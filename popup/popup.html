@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Auto-Tab Group</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1 class="title">Auto-Tab Group</h1>
+      <button id="toggleBtn" class="toggle-btn">
+        <span class="toggle-text">Enabled</span>
+      </button>
+    </div>
+
+    <!-- Status Section -->
+    <div class="status-section">
+      <div class="status-item">
+        <span class="status-label">Groups:</span>
+        <span id="groupCount" class="status-value">0</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Tabs:</span>
+        <span id="tabCount" class="status-value">0</span>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="actions-section">
+      <button id="groupAllBtn" class="action-btn primary">
+        Group All Tabs
+      </button>
+      <button id="ungroupAllBtn" class="action-btn secondary">
+        Ungroup All
+      </button>
+      <button id="collapseAllBtn" class="action-btn tertiary">
+        Collapse All
+      </button>
+    </div>
+
+    <!-- Current Groups -->
+    <div class="groups-section">
+      <h3 class="section-title">Current Groups</h3>
+      <div id="groupsList" class="groups-list">
+        <div class="loading">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Ungrouped Tabs -->
+    <div class="ungrouped-section">
+      <h3 class="section-title">Ungrouped Tabs</h3>
+      <div id="ungroupedList" class="ungrouped-list">
+        <div class="loading">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <button id="optionsBtn" class="link-btn">Options</button>
+      <button id="refreshBtn" class="link-btn">Refresh</button>
+    </div>
+  </div>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

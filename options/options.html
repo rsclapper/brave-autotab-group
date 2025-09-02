@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Auto-Tab Group Options</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <h1 class="title">Auto-Tab Group Settings</h1>
+      <div class="header-actions">
+        <button id="saveBtn" class="btn primary">Save Changes</button>
+        <button id="resetBtn" class="btn secondary">Reset to Defaults</button>
+      </div>
+    </header>
+
+    <!-- Main Settings -->
+    <section class="settings-section">
+      <h2 class="section-title">General Settings</h2>
+      <div class="setting-item">
+        <div class="setting-info">
+          <label class="setting-label" for="enabledToggle">Enable auto-grouping</label>
+          <p class="setting-description">Automatically group tabs when they are created or updated</p>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="enabledToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <label class="setting-label" for="domainGroupingToggle">Group by domain</label>
+          <p class="setting-description">Group tabs by domain when no specific rule matches</p>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="domainGroupingToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <label class="setting-label" for="autoCollapseToggle">Auto-collapse groups</label>
+          <p class="setting-description">Automatically collapse new tab groups to save space</p>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="autoCollapseToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <label class="setting-label" for="maxTabsInput">Max tabs per group</label>
+          <p class="setting-description">Maximum number of tabs allowed in a single group</p>
+        </div>
+        <input type="number" id="maxTabsInput" class="number-input" min="1" max="100" value="50">
+      </div>
+    </section>
+
+    <!-- Rules Section -->
+    <section class="rules-section">
+      <div class="rules-header">
+        <h2 class="section-title">Grouping Rules</h2>
+        <button id="addRuleBtn" class="btn primary small">Add Rule</button>
+      </div>
+      <p class="section-description">
+        Create custom rules to group tabs based on URL patterns. Rules are applied in order.
+      </p>
+      
+      <div id="rulesList" class="rules-list">
+        <div class="loading">Loading rules...</div>
+      </div>
+    </section>
+
+    <!-- Import/Export Section -->
+    <section class="import-export-section">
+      <h2 class="section-title">Backup & Restore</h2>
+      <div class="import-export-actions">
+        <button id="exportBtn" class="btn secondary">Export Settings</button>
+        <div class="import-wrapper">
+          <button id="importBtn" class="btn secondary">Import Settings</button>
+          <input type="file" id="importFile" accept=".json" style="display: none;">
+        </div>
+      </div>
+    </section>
+
+    <!-- Status Bar -->
+    <div id="statusBar" class="status-bar hidden">
+      <span class="status-text"></span>
+    </div>
+  </div>
+
+  <!-- Add/Edit Rule Modal -->
+  <div id="ruleModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Add New Rule</h3>
+        <button id="closeModal" class="close-btn">&times;</button>
+      </div>
+      <form id="ruleForm" class="rule-form">
+        <div class="form-group">
+          <label for="ruleName">Rule Name</label>
+          <input type="text" id="ruleName" required placeholder="e.g., Social Media">
+        </div>
+
+        <div class="form-group">
+          <label for="ruleColor">Group Color</label>
+          <select id="ruleColor" required>
+            <option value="blue">Blue</option>
+            <option value="red">Red</option>
+            <option value="yellow">Yellow</option>
+            <option value="green">Green</option>
+            <option value="pink">Pink</option>
+            <option value="purple">Purple</option>
+            <option value="cyan">Cyan</option>
+            <option value="orange">Orange</option>
+            <option value="grey">Grey</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="rulePatterns">URL Patterns (one per line)</label>
+          <textarea 
+            id="rulePatterns" 
+            required 
+            placeholder="facebook.com&#10;twitter.com&#10;x.com&#10;instagram.com"
+            rows="5"></textarea>
+          <small class="form-hint">
+            Use domain names (e.g., "google.com") or patterns with wildcards (e.g., "*.google.com")
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="ruleEnabled" checked>
+            Enable this rule
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" id="testRuleBtn" class="btn secondary">Test Rule</button>
+          <button type="submit" class="btn primary">Save Rule</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Test Rule Modal -->
+  <div id="testModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Test Rule</h3>
+        <button id="closeTestModal" class="close-btn">&times;</button>
+      </div>
+      <div class="test-content">
+        <div class="form-group">
+          <label for="testUrl">Test URL</label>
+          <input type="url" id="testUrl" placeholder="https://example.com">
+          <button id="runTestBtn" class="btn primary small">Test</button>
+        </div>
+        <div id="testResults" class="test-results"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="options.js"></script>
+</body>
+</html>
