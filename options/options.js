@@ -1,12 +1,15 @@
 import { StorageManager } from '../utils/storage.js';
 import { RuleEngine } from '../utils/rules.js';
+import { HistoryAnalyzer } from '../utils/history-analyzer.js';
 
 class OptionsManager {
   constructor() {
     this.storageManager = new StorageManager();
     this.ruleEngine = new RuleEngine();
+    this.historyAnalyzer = new HistoryAnalyzer();
     this.currentSettings = null;
     this.editingRuleId = null;
+    this.currentSuggestions = [];
     this.init();
   }
 
@@ -44,6 +47,10 @@ class OptionsManager {
       this.currentSettings.maxTabsPerGroup = parseInt(e.target.value) || 50;
     });
 
+    document.getElementById('groupSortSelect').addEventListener('change', (e) => {
+      this.currentSettings.groupSortOrder = e.target.value;
+    });
+
     // Header actions
     document.getElementById('saveBtn').addEventListener('click', () => {
       this.saveSettings();
@@ -69,6 +76,11 @@ class OptionsManager {
 
     document.getElementById('importFile').addEventListener('change', (e) => {
       this.importSettings(e.target.files[0]);
+    });
+
+    // Suggestions
+    document.getElementById('analyzePlaceholderBtn').addEventListener('click', () => {
+      this.analyzeHistoryAndGenerateSuggestions();
     });
 
     // Modal events
@@ -130,6 +142,7 @@ class OptionsManager {
     document.getElementById('domainGroupingToggle').checked = this.currentSettings.groupByDomain;
     document.getElementById('autoCollapseToggle').checked = this.currentSettings.autoCollapseGroups;
     document.getElementById('maxTabsInput').value = this.currentSettings.maxTabsPerGroup;
+    document.getElementById('groupSortSelect').value = this.currentSettings.groupSortOrder || 'created';
   }
 
   renderRules() {
@@ -446,6 +459,153 @@ class OptionsManager {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+  }
+
+  async analyzeHistoryAndGenerateSuggestions() {
+    try {
+      const analyzeBtn = document.getElementById('analyzePlaceholderBtn');
+      const suggestionsList = document.getElementById('suggestionsList');
+      
+      // Show loading state
+      analyzeBtn.disabled = true;
+      analyzeBtn.textContent = 'Analyzing...';
+      suggestionsList.innerHTML = '<div class="loading">Analyzing your browsing history...</div>';
+      
+      // Analyze history
+      const analysisResult = await this.historyAnalyzer.analyzeHistory(7);
+      
+      // Filter out suggestions that overlap with existing rules
+      const filteredSuggestions = await this.historyAnalyzer.filterExistingSuggestions(
+        analysisResult.suggestions, 
+        this.currentSettings.rules
+      );
+      
+      this.currentSuggestions = filteredSuggestions;
+      this.renderSuggestions(filteredSuggestions);
+      
+      // Reset button
+      analyzeBtn.disabled = false;
+      analyzeBtn.textContent = 'Refresh Analysis';
+      
+      if (filteredSuggestions.length === 0) {
+        this.showStatus('No new rule suggestions found based on your recent browsing history', 'info');
+      } else {
+        this.showStatus(`Found ${filteredSuggestions.length} rule suggestions based on your browsing patterns`, 'success');
+      }
+      
+    } catch (error) {
+      console.error('Error analyzing history:', error);
+      this.showStatus('Error analyzing browsing history. Please check permissions.', 'error');
+      
+      // Reset button
+      const analyzeBtn = document.getElementById('analyzePlaceholderBtn');
+      analyzeBtn.disabled = false;
+      analyzeBtn.textContent = 'Analyze History';
+      
+      document.getElementById('suggestionsList').innerHTML = 
+        '<div class="suggestions-placeholder">Error loading suggestions. Please try again.</div>';
+    }
+  }
+
+  renderSuggestions(suggestions) {
+    const suggestionsList = document.getElementById('suggestionsList');
+    
+    if (suggestions.length === 0) {
+      suggestionsList.innerHTML = `
+        <div class="suggestions-placeholder">
+          No new rule suggestions found. Your current rules already cover your most visited sites!
+        </div>
+      `;
+      return;
+    }
+
+    suggestionsList.innerHTML = suggestions.map(suggestion => `
+      <div class="suggestion-item" data-suggestion-id="${suggestion.id}">
+        <div class="suggestion-info">
+          <div class="suggestion-header">
+            <div class="suggestion-color color-${suggestion.color}"></div>
+            <span class="suggestion-name">${this.escapeHtml(suggestion.name)}</span>
+            <span class="suggestion-confidence">${suggestion.confidence}% confidence</span>
+          </div>
+          <div class="suggestion-details">
+            <div class="suggestion-patterns">
+              <strong>Domains:</strong> ${suggestion.patterns.slice(0, 3).map(p => this.escapeHtml(p)).join(', ')}${suggestion.patterns.length > 3 ? ` +${suggestion.patterns.length - 3} more` : ''}
+            </div>
+            <div class="suggestion-stats">
+              <span class="suggestion-visits">${suggestion.totalVisits} visits</span> •
+              <span class="suggestion-category">${this.escapeHtml(suggestion.category)}</span>
+            </div>
+          </div>
+        </div>
+        <div class="suggestion-actions">
+          <button class="suggestion-btn accept" data-action="accept" data-suggestion-id="${suggestion.id}">
+            Accept
+          </button>
+          <button class="suggestion-btn reject" data-action="reject" data-suggestion-id="${suggestion.id}">
+            Dismiss
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    // Add event listeners for suggestion actions
+    suggestionsList.addEventListener('click', (e) => {
+      if (e.target.classList.contains('suggestion-btn')) {
+        const action = e.target.dataset.action;
+        const suggestionId = e.target.dataset.suggestionId;
+        this.handleSuggestionAction(action, suggestionId);
+      }
+    });
+  }
+
+  async handleSuggestionAction(action, suggestionId) {
+    const suggestion = this.currentSuggestions.find(s => s.id === suggestionId);
+    if (!suggestion) return;
+
+    try {
+      if (action === 'accept') {
+        // Convert suggestion to rule and add it
+        const newRule = {
+          id: this.generateRuleId(),
+          name: suggestion.name,
+          patterns: suggestion.patterns,
+          color: suggestion.color,
+          enabled: true
+        };
+
+        this.currentSettings.rules.push(newRule);
+        await this.saveSettings();
+        this.renderRules();
+        
+        this.showStatus(`Added rule "${suggestion.name}" successfully`, 'success');
+      }
+
+      // Remove suggestion from display (for both accept and reject)
+      this.removeSuggestionFromDisplay(suggestionId);
+      
+    } catch (error) {
+      console.error('Error handling suggestion action:', error);
+      this.showStatus('Error processing suggestion', 'error');
+    }
+  }
+
+  removeSuggestionFromDisplay(suggestionId) {
+    const suggestionElement = document.querySelector(`[data-suggestion-id="${suggestionId}"]`);
+    if (suggestionElement) {
+      suggestionElement.remove();
+    }
+
+    // Remove from current suggestions
+    this.currentSuggestions = this.currentSuggestions.filter(s => s.id !== suggestionId);
+
+    // If no more suggestions, show placeholder
+    if (this.currentSuggestions.length === 0) {
+      document.getElementById('suggestionsList').innerHTML = `
+        <div class="suggestions-placeholder">
+          All suggestions have been processed! Click "Refresh Analysis" to check for new ones.
+        </div>
+      `;
+    }
   }
 }
 

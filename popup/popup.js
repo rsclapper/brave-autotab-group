@@ -50,6 +50,10 @@ class PopupManager {
       this.collapseAllGroups();
     });
 
+    document.getElementById('sortGroupsBtn').addEventListener('click', () => {
+      this.sortAllGroups();
+    });
+
     // Footer buttons
     document.getElementById('optionsBtn').addEventListener('click', () => {
       chrome.runtime.openOptionsPage();
@@ -133,6 +137,23 @@ class PopupManager {
       setTimeout(() => this.refreshData(), 300); // Give time for collapsing to complete
     } catch (error) {
       console.error('Error collapsing all groups:', error);
+      this.setLoading(false);
+    }
+  }
+
+  async sortAllGroups() {
+    try {
+      this.setLoading(true);
+      
+      // Import GroupingEngine to handle sorting
+      const { GroupingEngine } = await import('../utils/grouping.js');
+      const groupingEngine = new GroupingEngine();
+      
+      await groupingEngine.reorderTabGroups(this.currentWindowId);
+      
+      setTimeout(() => this.refreshData(), 500); // Give time for reordering to complete
+    } catch (error) {
+      console.error('Error sorting groups:', error);
       this.setLoading(false);
     }
   }

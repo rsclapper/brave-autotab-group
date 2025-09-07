@@ -242,8 +242,11 @@ export class GroupingEngine {
         tabs: groupedTabs.get(group.id) || []
       }));
 
+      // Sort groups according to settings
+      const sortedGroups = await this.sortGroups(groupInfo);
+
       return {
-        groups: groupInfo,
+        groups: sortedGroups,
         ungroupedTabs,
         totalTabs: tabs.length,
         totalGroups: groups.length
@@ -256,6 +259,73 @@ export class GroupingEngine {
         totalTabs: 0,
         totalGroups: 0
       };
+    }
+  }
+
+  async sortGroups(groups) {
+    try {
+      const settings = await this.getSettings();
+      const sortOrder = settings.groupSortOrder || 'created';
+
+      if (sortOrder === 'alphabetical') {
+        // Sort alphabetically by title
+        return groups.sort((a, b) => {
+          const titleA = (a.title || 'Untitled').toLowerCase();
+          const titleB = (b.title || 'Untitled').toLowerCase();
+          return titleA.localeCompare(titleB);
+        });
+      } else {
+        // Sort by creation time (newest first) - this is the default Chrome order
+        // Chrome tab groups with higher IDs are generally newer
+        return groups.sort((a, b) => b.id - a.id);
+      }
+    } catch (error) {
+      console.error('Error sorting groups:', error);
+      return groups; // Return unsorted on error
+    }
+  }
+
+  async reorderTabGroups(windowId) {
+    try {
+      // Get current groups and sort them
+      const groups = await chrome.tabGroups.query({ windowId });
+      if (groups.length <= 1) {
+        return; // Nothing to sort
+      }
+
+      const sortedGroups = await this.sortGroups(groups);
+      
+      // Get all tabs for reordering
+      const allTabs = await chrome.tabs.query({ windowId });
+      
+      // Calculate new positions for tab groups
+      const reorderPromises = [];
+      let currentIndex = 0;
+
+      for (const group of sortedGroups) {
+        // Get tabs in this group
+        const groupTabs = allTabs.filter(tab => tab.groupId === group.id);
+        
+        if (groupTabs.length > 0) {
+          // Move each tab in the group to its new position
+          for (let i = 0; i < groupTabs.length; i++) {
+            const tab = groupTabs[i];
+            reorderPromises.push(
+              chrome.tabs.move(tab.id, { index: currentIndex + i })
+            );
+          }
+          currentIndex += groupTabs.length;
+        }
+      }
+
+      // Execute all move operations
+      if (reorderPromises.length > 0) {
+        await Promise.all(reorderPromises);
+      }
+
+    } catch (error) {
+      console.error('Error reordering tab groups:', error);
+      throw error;
     }
   }
 

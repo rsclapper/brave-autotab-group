@@ -41,7 +41,8 @@ export class StorageManager {
       ],
       groupByDomain: true,
       autoCollapseGroups: false,
-      maxTabsPerGroup: 50
+      maxTabsPerGroup: 50,
+      groupSortOrder: 'created' // 'created', 'alphabetical'
     };
   }
 

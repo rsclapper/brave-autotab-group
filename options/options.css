@@ -189,6 +189,23 @@ input:checked + .slider:before {
   font-size: 14px;
 }
 
+/* Select Input */
+.select-input {
+  width: 220px;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: white;
+  cursor: pointer;
+}
+
+.select-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
 /* Rules Section */
 .rules-header {
   display: flex;
@@ -285,6 +302,140 @@ input:checked + .slider:before {
 
 .rule-btn.danger:hover {
   background: #fca5a5;
+}
+
+/* Suggestions Section */
+.suggestions-section {
+  margin-bottom: 32px;
+}
+
+.suggestions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.suggestions-list {
+  margin-top: 20px;
+}
+
+.suggestions-placeholder {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 14px;
+  padding: 40px 20px;
+  font-style: italic;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 2px dashed #e5e7eb;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  background: #ffffff;
+  transition: all 0.2s;
+}
+
+.suggestion-item:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.suggestion-info {
+  flex: 1;
+}
+
+.suggestion-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.suggestion-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.suggestion-name {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+}
+
+.suggestion-confidence {
+  font-size: 12px;
+  color: #10b981;
+  background: #d1fae5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.suggestion-details {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.suggestion-patterns {
+  margin-bottom: 4px;
+}
+
+.suggestion-stats {
+  font-size: 12px;
+}
+
+.suggestion-visits {
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+.suggestion-category {
+  text-transform: capitalize;
+}
+
+.suggestion-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: 16px;
+}
+
+.suggestion-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.suggestion-btn.accept {
+  background: #10b981;
+  color: white;
+}
+
+.suggestion-btn.accept:hover {
+  background: #059669;
+}
+
+.suggestion-btn.reject {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.suggestion-btn.reject:hover {
+  background: #e5e7eb;
+  color: #374151;
 }
 
 /* Import/Export */

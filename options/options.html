@@ -60,6 +60,17 @@
         </div>
         <input type="number" id="maxTabsInput" class="number-input" min="1" max="100" value="50">
       </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <label class="setting-label" for="groupSortSelect">Group sort order</label>
+          <p class="setting-description">How to sort tab groups in the popup and browser</p>
+        </div>
+        <select id="groupSortSelect" class="select-input">
+          <option value="created">By creation time (newest first)</option>
+          <option value="alphabetical">Alphabetically by name</option>
+        </select>
+      </div>
     </section>
 
     <!-- Rules Section -->
@@ -74,6 +85,23 @@
       
       <div id="rulesList" class="rules-list">
         <div class="loading">Loading rules...</div>
+      </div>
+    </section>
+
+    <!-- Rule Suggestions Section -->
+    <section class="suggestions-section">
+      <div class="suggestions-header">
+        <h2 class="section-title">Suggested Rules</h2>
+        <button id="analyzePlaceholderBtn" class="btn secondary small">Analyze History</button>
+      </div>
+      <p class="section-description">
+        Based on your browsing history from the last 7 days, here are suggested grouping rules.
+      </p>
+      
+      <div id="suggestionsList" class="suggestions-list">
+        <div class="suggestions-placeholder">
+          Click "Analyze History" to get personalized rule suggestions based on your browsing patterns.
+        </div>
       </div>
     </section>
 
